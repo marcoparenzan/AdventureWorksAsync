@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Customers";
+}
+<h2>@ViewData["Title"]</h2>
+<table class="table table-striped" id="customers">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<a href="#" id="GetCustomersListCommand" class="btn btn-primary">
+    GetCustomersListCommand
+</a>
+
+@section Scripts
+    {
+    <script src="~/lib/signalr/browser/signalr.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            var commandResponses =
+                new signalR
+                    .HubConnectionBuilder()
+                    .withUrl("/commandresponses")
+                    .build();
+
+            commandResponses.start();
+            commandResponses.on("GetCustomersListResponse", (args) => {
+
+                var tbody = $("#customers tbody");
+                tbody.empty();
+
+                $(args).each((i, item) => {
+
+                    var a = "<a href='/Customers/Edit/" + item.Id + "' class='btn btn-default'>Edit</a>"
+                    tbody.append("<tr><td>" + item.Name + "</td><td>" + a + "</td></tr>")
+
+                });
+
+            });
+
+            $("#GetCustomersListCommand").click(function () {
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetCustomersListCommand")',
+                    data: JSON.stringify({
+                    }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json"
+                });
+
+            });
+
+        });
+
+    </script>
+}
