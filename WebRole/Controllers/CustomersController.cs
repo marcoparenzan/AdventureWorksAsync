@@ -28,33 +28,65 @@ namespace WebRole.Controllers
 
         public IActionResult Edit(int id)
         {
+            ViewBag.id = id;
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> GetCustomersListCommand()
         {
+            await SendCommand(new
+            {
+                Type = "GetCustomersList"
+            });
+
+            return Json(new
+            {
+                Success = true
+            });
+        }
+
+        private async Task SendCommand<TCommand>(TCommand command)
+        {
             var storageAccount =
                 CloudStorageAccount.Parse(
                     _configuration["StorageConnectionString"]);
 
-            var queueClient = 
+            var queueClient =
                 storageAccount.CreateCloudQueueClient();
 
-            var commandsQueue = 
+            var commandsQueue =
                 queueClient.GetQueueReference("webrolecommands");
             await commandsQueue.CreateIfNotExistsAsync();
 
-            var command = new
-            {
-                Type = "GetCustomersList"
-            };
             var jsonCommand = JsonConvert.SerializeObject(command);
 
             var message = new CloudQueueMessage(jsonCommand);
 
             await commandsQueue.AddMessageAsync(message);
+        }
 
+        [HttpGet]
+        [ActionName("Customer")]
+        public async Task<IActionResult> GetCustomer(int id)
+        {
+            await SendCommand(new
+            {
+                Type = "GetCustomer",
+                Id = id
+            });
+
+            return Json(new
+            {
+                Success = true
+            });
+        }
+
+
+        [HttpPost]
+        [ActionName("Customer")]
+        public IActionResult UpdateCustomer(int id)
+        {
             return Json(new
             {
                 Success = true

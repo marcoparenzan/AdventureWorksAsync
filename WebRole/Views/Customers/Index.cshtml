@@ -37,9 +37,17 @@
 
                 $(args).each((i, item) => {
 
-                    var a = "<a href='/Customers/Edit/" + item.Id + "' class='btn btn-default'>Edit</a>"
+                    @*var action = '@Url.Action("Edit", new { id = "__id__" })'.replace("__id__", item.Id);
+                    var a = "<a href='" + action + "' class='btn btn-default'>Edit</a>"*@
+                    var a = "<a data-id='" + item.Id + "' href='#' class='btn btn-default editCustomer'>Edit</a>"
                     tbody.append("<tr><td>" + item.Name + "</td><td>" + a + "</td></tr>")
 
+                });
+
+                $("a.editCustomer").click(function (e) { 
+                    var id = $(e.target).data("id");
+                    var url = '@Url.Action("Edit", new { id = "__id__" })'.replace("__id__", id);
+                    window.location.href = url;
                 });
 
             });

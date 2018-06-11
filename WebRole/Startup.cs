@@ -46,8 +46,15 @@ namespace WebRole
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
+                    name: "spa",
+                    template: "/pippo/{*tuttoilrestoeilnulla}", defaults: new {
+                        controller = "spa",
+                        action = "page"
+                    });
+
+                routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "/pages/{controller=Home}/{action=Index}");
             });
 
             app.UseSignalR(routes =>

@@ -78,6 +78,31 @@ namespace WorkerRole
                             conn.Close();
                         }
                         break;
+                    case "GetCustomer":
+                        using (var conn = new SqlConnection(configuration["SqlConnectionString"]))
+                        {
+                            conn.Open();
+
+                            var result = conn.QuerySingle<GetCustomerDto>(
+                                "SELECT CustomerId AS Id, FirstName, LastName FROM salesLT.Customer WHERE CustomerId = @id",
+                                new { id = command.Value<int>("Id") }
+                            );
+
+                            var response = new
+                            {
+                                Type = "GetCustomerResponse",
+                                Result = result
+                            };
+
+                            var jsonResponse = JsonConvert.SerializeObject(response);
+
+                            var responseMessage = new CloudQueueMessage(jsonResponse);
+
+                            await commandsResponsesQueue.AddMessageAsync(responseMessage);
+
+                            conn.Close();
+                        }
+                        break;
                     default:
                         break;
                 }

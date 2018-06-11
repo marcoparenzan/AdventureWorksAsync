@@ -56,6 +56,10 @@ namespace WebRole.Services
                             var result = command.Value<JArray>("Result");
                             await _hub.Clients.All.SendAsync("GetCustomersListResponse", result);
                             break;
+                        case "GetCustomerResponse":
+                            var result1 = command.Value<JObject>("Result");
+                            await _hub.Clients.All.SendAsync("CustomerAvailable", result1);
+                            break;
                         default:
                             break;
                     }

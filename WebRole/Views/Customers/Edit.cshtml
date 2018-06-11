@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Edit";
+}
+<h2>Edit</h2>
+<form class="form-horizontal" method="post" action="@Url.Action("Customer", new { id = ViewBag.id })">
+    <div class="form-control">
+        <label for="FirstName">First name</label>
+        <input type="text" name="FirstName" class="col-md-4" />
+    </div>
+    <div class="form-control">
+        <label for="LastName">Last name</label>
+        <input type="text" name="LastName" class="col-md-4" />
+    </div>
+</form>
+
+@section Scripts
+{
+    <script src="~/lib/signalr/browser/signalr.js"></script>
+    <script type="text/javascript">
+
+        var id = @(ViewBag.id);
+        var url = '@Url.Action("Customer", new { id = ViewBag.id })';
+
+        var commandResponses =
+            new signalR
+                .HubConnectionBuilder()
+                .withUrl("/commandresponses")
+                .build();
+
+        commandResponses.start();
+        commandResponses.on("CustomerAvailable", (args) => {
+
+            $("[name='FirstName']").val(args.FirstName);
+            $("[name='LastName']").val(args.LastName);
+
+        });
+        commandResponses.on("CustomerUpdated", (args) => {
+
+
+        });
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: JSON.stringify({
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+        });
+
+    </script>
+}

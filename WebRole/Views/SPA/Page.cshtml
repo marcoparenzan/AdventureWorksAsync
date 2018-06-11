@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewData["Title"] = "Page";
+}
+
+<h2>Page</h2>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        $(function(){
+
+            var href = window.location.href;
+            var relurl = "/pages" + href.substring(href.indexOf("#") + 1);
+
+            alert(relurl);
+
+        });
+
+    </script>
+}
