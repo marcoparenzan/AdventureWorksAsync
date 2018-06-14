@@ -53,12 +53,18 @@ namespace WebRole.Services
                     switch (type)
                     {
                         case "GetCustomersListResponse":
-                            var result = command.Value<JArray>("Result");
-                            await _hub.Clients.All.SendAsync("GetCustomersListResponse", result);
+                            //var result = command.Value<JArray>("Result");
+                            // to be fast, I use command directly, but it is wrong!
+                            // build the correct dto
+                            await _hub.Clients.All.SendAsync("GetCustomersListResponse", command);
                             break;
                         case "GetCustomerResponse":
                             var result1 = command.Value<JObject>("Result");
                             await _hub.Clients.All.SendAsync("CustomerAvailable", result1);
+                            break;
+                        case "UpdateCustomerResponse":
+                            var id = command.Value<int>("Id");
+                            await _hub.Clients.All.SendAsync("CustomerUpdated", new { Id = id });
                             break;
                         default:
                             break;

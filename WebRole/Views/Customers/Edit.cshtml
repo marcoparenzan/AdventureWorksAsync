@@ -1,25 +1,29 @@
 ﻿@{
     ViewData["Title"] = "Edit";
 }
-<h2>Edit</h2>
-<form class="form-horizontal" method="post" action="@Url.Action("Customer", new { id = ViewBag.id })">
-    <div class="form-control">
-        <label for="FirstName">First name</label>
-        <input type="text" name="FirstName" class="col-md-4" />
-    </div>
-    <div class="form-control">
-        <label for="LastName">Last name</label>
-        <input type="text" name="LastName" class="col-md-4" />
-    </div>
-</form>
-
+<div class="row">
+    <h2>Edit</h2>
+    <form>
+        <div class="form-group col-md-4">
+            <label for="FirstName">First name</label>
+            <input type="text" name="FirstName" class="form-control" />
+        </div>
+        <div class="form-group col-md-4">
+            <label for="LastName">Last name</label>
+            <input type="text" name="LastName" class="form-control" />
+        </div>
+        <a class="btn btn-primary updatecustomer">Update</a>
+    </form>
+</div>
 @section Scripts
-{
+    {
     <script src="~/lib/signalr/browser/signalr.js"></script>
     <script type="text/javascript">
 
         var id = @(ViewBag.id);
         var url = '@Url.Action("Customer", new { id = ViewBag.id })';
+
+        var root = $("form");
 
         var commandResponses =
             new signalR
@@ -30,12 +34,26 @@
         commandResponses.start();
         commandResponses.on("CustomerAvailable", (args) => {
 
-            $("[name='FirstName']").val(args.FirstName);
-            $("[name='LastName']").val(args.LastName);
+            var keys = Object.keys(args);
+            $(keys).each(function (i, item) {
+
+                root.find("input[name='" + item + "']").val(args[item]);
+
+            });
+
+            //$("[name='FirstName']").val(args.FirstName);
+            //$("[name='LastName']").val(args.LastName);
 
         });
         commandResponses.on("CustomerUpdated", (args) => {
 
+            if (args.Errors === true) {
+
+            }
+            else { 
+                alert("Aggiornato");
+                window.location.href = '@Url.Action("Index")';
+            }
 
         });
 
@@ -46,6 +64,27 @@
             }),
             contentType: "application/json; charset=utf-8",
             dataType: "json"
+        });
+
+        $(".btn.updatecustomer").click(function () {
+
+            var data = {
+
+            };
+
+            root.find("input").each(function (i, item) {
+                data[$(item).attr("name")] = $(item).val();
+            });
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            });
+
+
         });
 
     </script>

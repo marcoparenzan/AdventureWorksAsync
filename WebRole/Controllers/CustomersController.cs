@@ -33,11 +33,12 @@ namespace WebRole.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetCustomersListCommand()
+        public async Task<IActionResult> GetCustomersListCommand([FromBody] JObject args)
         {
             await SendCommand(new
             {
-                Type = "GetCustomersList"
+                Type = "GetCustomersList",
+                Args = args
             });
 
             return Json(new
@@ -85,8 +86,15 @@ namespace WebRole.Controllers
 
         [HttpPost]
         [ActionName("Customer")]
-        public IActionResult UpdateCustomer(int id)
+        public async Task<IActionResult> UpdateCustomer(int id, [FromBody] JObject customer)
         {
+            await SendCommand(new
+            {
+                Type = "UpdateCustomer",
+                Id = id,
+                CustomerInfo = customer
+            });
+
             return Json(new
             {
                 Success = true

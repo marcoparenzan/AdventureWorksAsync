@@ -5,16 +5,15 @@
 <table class="table table-striped" id="customers">
     <thead>
         <tr>
-            <th>Name</th>
+            <th>Last name</th>
+            <th>First name</th>
             <th></th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
-
-<a href="#" id="GetCustomersListCommand" class="btn btn-primary">
-    GetCustomersListCommand
-</a>
+<ul class="pagination">
+</ul>
 
 @section Scripts
     {
@@ -32,38 +31,59 @@
             commandResponses.start();
             commandResponses.on("GetCustomersListResponse", (args) => {
 
-                var tbody = $("#customers tbody");
+                var table = $("#customers");
+
+                var tbody = table.find("tbody");
                 tbody.empty();
 
-                $(args).each((i, item) => {
+                $(args.Rows).each((i, item) => {
 
                     @*var action = '@Url.Action("Edit", new { id = "__id__" })'.replace("__id__", item.Id);
                     var a = "<a href='" + action + "' class='btn btn-default'>Edit</a>"*@
                     var a = "<a data-id='" + item.Id + "' href='#' class='btn btn-default editCustomer'>Edit</a>"
-                    tbody.append("<tr><td>" + item.Name + "</td><td>" + a + "</td></tr>")
+                    tbody.append("<tr><td>" + item.LastName + "</td><td>" + item.FirstName + "</td><td>" + a + "</td></tr>")
 
                 });
 
-                $("a.editCustomer").click(function (e) { 
+                $("a.editCustomer").click(function (e) {
                     var id = $(e.target).data("id");
                     var url = '@Url.Action("Edit", new { id = "__id__" })'.replace("__id__", id);
                     window.location.href = url;
                 });
 
+                var pagination = table.siblings(".pagination");
+                pagination.empty();
+                for (var i = 1; i <= args.PageCount; i++) { 
+                    if (i === args.PageNumber) {
+                        pagination.append("<li class='active'><a href='#'>" + i + "</a></li>");
+                    }
+                    else { 
+                        pagination.append("<li><a href='#'>" + i + "</a></li>");
+                    }
+                }
+
+                pagination.find("a").click(function (e) {
+                    getCustomerList($(e.target).html());
+                });
+
+
             });
 
-            $("#GetCustomersListCommand").click(function () {
+            var getCustomerList = function(pageNumber, pageSize) {
 
                 $.ajax({
                     type: "POST",
                     url: '@Url.Action("GetCustomersListCommand")',
                     data: JSON.stringify({
+                        pageNumber: pageNumber || 1,
+                        pageSize: pageSize || 10
                     }),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json"
                 });
 
-            });
+            };
+            getCustomerList();
 
         });
 

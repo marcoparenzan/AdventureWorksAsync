@@ -59,14 +59,23 @@ namespace WorkerRole
                         {
                             conn.Open();
 
-                            var query = conn.Query<GetCustomerListDto>(
-                                "SELECT TOP 10 CustomerId AS Id, CompanyName AS Name FROM salesLT.Customer ORDER BY Name"
+                            var args1 = command.Value<JObject>("Args");
+                            var pageNumber = args1.Value<int>("pageNumber");
+                            var pageSize = args1.Value<int>("pageSize");
+
+                            var rows = conn.Query<GetCustomerListDto>(
+                                $"SELECT CustomerId AS Id, FirstName, LastName FROM salesLT.Customer ORDER BY LastName, FirstName OFFSET {pageSize*(pageNumber-1)} ROWS FETCH NEXT {pageSize} ROWS ONLY"
                             );
+
+                            var rowCount = conn.QuerySingle<int>("SELECT COUNT(*) FROM salesLT.Customer");
 
                             var response = new
                             {
                                 Type = "GetCustomersListResponse",
-                                Result = query.ToList()
+                                Rows = rows,
+                                PageSize = pageSize,
+                                PageNumber = pageNumber,
+                                PageCount = Math.Ceiling(rowCount/(decimal) pageSize)
                             };
 
                             var jsonResponse = JsonConvert.SerializeObject(response);
@@ -92,6 +101,35 @@ namespace WorkerRole
                             {
                                 Type = "GetCustomerResponse",
                                 Result = result
+                            };
+
+                            var jsonResponse = JsonConvert.SerializeObject(response);
+
+                            var responseMessage = new CloudQueueMessage(jsonResponse);
+
+                            await commandsResponsesQueue.AddMessageAsync(responseMessage);
+
+                            conn.Close();
+                        }
+                        break;
+                    case "UpdateCustomer":
+                        using (var conn = new SqlConnection(configuration["SqlConnectionString"]))
+                        {
+                            conn.Open();
+
+                            var id = command.Value<int>("Id");
+                            var customerInfo = command.Value<JObject>("CustomerInfo");
+                            var firstName = customerInfo.Value<string>("FirstName");
+                            var lastName = customerInfo.Value<string>("LastName");
+
+                            var updated = await conn.ExecuteAsync(
+                                "UPDATE salesLT.Customer SET FirstName = @FirstName, LastName = @LastName WHERE CustomerId = @Id",
+                                new { id, firstName, lastName });
+
+                            var response = new
+                            {
+                                Type = "UpdateCustomerResponse",
+                                Id = id
                             };
 
                             var jsonResponse = JsonConvert.SerializeObject(response);
