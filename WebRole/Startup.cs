@@ -25,6 +25,7 @@ namespace WebRole
         {
             services.AddMvc();
             services.AddSingleton<IHostedService, CommandResponsesService>();
+            services.AddSingleton<ISignalRRegistry, SignalRRegistry>();
             services.AddSignalR();
         }
 

@@ -29,6 +29,9 @@
                     .build();
 
             commandResponses.start();
+
+            commandResponses.register(commandResponses.id, @User.Identity.Name);
+
             commandResponses.on("GetCustomersListResponse", (args) => {
 
                 var table = $("#customers");

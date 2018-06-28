@@ -16,11 +16,13 @@ namespace WebRole.Services
     {
         private IConfiguration _configuration;
         private IHubContext<CommandResponsesHub> _hub;
+        private ISignalRRegistry _registry;
 
-        public CommandResponsesService(IConfiguration configuration, IHubContext<CommandResponsesHub> hub)
+        public CommandResponsesService(IConfiguration configuration, IHubContext<CommandResponsesHub> hub, ISignalRRegistry registry)
         {
             _configuration = configuration;
             _hub = hub;
+            _registry = registry;
         }
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
@@ -60,7 +62,9 @@ namespace WebRole.Services
                             break;
                         case "GetCustomerResponse":
                             var result1 = command.Value<JObject>("Result");
-                            await _hub.Clients.All.SendAsync("CustomerAvailable", result1);
+                            var username = command.Value<string>("Username");
+
+                            await _hub.Clients.Client(_registry.ClientIdFromUsername(username)).SendAsync("CustomerAvailable", result1);
                             break;
                         case "UpdateCustomerResponse":
                             var id = command.Value<int>("Id");
