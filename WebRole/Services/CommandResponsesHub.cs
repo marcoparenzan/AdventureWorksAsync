@@ -16,9 +16,9 @@ namespace WebRole.Services
             _registry = registry;
         }
 
-        public void Register(string id, string username)
+        public void Register(string username)
         {
-            _registry.Register(id, username);
+            _registry.Register(this.Context.ConnectionId, username);
         }
     }
 }

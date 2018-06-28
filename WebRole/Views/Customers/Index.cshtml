@@ -28,9 +28,12 @@
                     .withUrl("/commandresponses")
                     .build();
 
-            commandResponses.start();
+            commandResponses.start().then(() => { 
 
-            commandResponses.register(commandResponses.id, @User.Identity.Name);
+                commandResponses.invoke("Register", "@User.Identity.Name");
+
+            });
+            
 
             commandResponses.on("GetCustomersListResponse", (args) => {
 
